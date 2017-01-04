@@ -1,0 +1,42 @@
+---
+- hosts: lemp
+  gather_facts: yes
+  become: true
+  
+  vars_files:
+    - vars/main.yml
+
+  roles:
+    - ansible-role-repo-epel
+    - ansible-role-repo-remi
+    - ansible-role-nginx
+    - ansible-role-php
+    - ansible-role-mysql
+
+  tasks: 
+    - name: Pass PHP to php-fpm
+      blockinfile:
+        dest: /etc/nginx/conf.d/default.conf
+        insertbefore: "}"
+        block: |
+          location ~ \.php$ {
+          root           /usr/share/nginx/html;
+          try_files $uri =404;
+          fastcgi_pass   127.0.0.1:9000;
+          fastcgi_index  index.php;
+          fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+          include        fastcgi_params;
+          }
+
+    - name: Install VIM
+      package:
+        name: vim
+        state: latest
+
+    - name: Allow Nginx in firewalld
+      firewalld:
+        immediate: yes
+        service: http
+        permanent: true
+        state: enabled
+
