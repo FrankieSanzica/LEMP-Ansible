@@ -8,9 +8,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Set the default Image
   # NOTE: If you want to default to Windows, switch base box images
   config.vm.box = "puppetlabs/centos-7.2-64-nocm"
-  #config.vm.box = "opentable/win-2012r2-standard-amd64-nocm"
   config.ssh.insert_key = false
-
 
   # Set default virtualbox configurations
   config.vm.provider :virtualbox do |v|
@@ -39,11 +37,10 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
      end
    end
 
-
   # Ansible provisioner
   config.vm.provision "ansible" do |ansible|
     ansible.groups = {
-        "lemp" => ["lemptestbox"]
+        "LEMP" => ["lemptestbox"]
     }
     ansible.playbook = "playbook.yml"
     ansible.galaxy_role_file = "roles/requirements.yml"

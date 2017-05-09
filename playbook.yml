@@ -1,10 +1,50 @@
 ---
-- hosts: lemp
+- hosts: LEMP
   gather_facts: yes
   become: true
   
   vars_files:
     - vars/main.yml
+  
+  pre_tasks:
+
+    - name: Add timestamps to history
+      lineinfile: 
+        dest: /root/.bash_profile
+        state: present
+        line: 'HISTTIMEFORMAT="%m/%d/%y %T "' 
+
+    - name: Configure MOTD
+      template:
+        src: 'motd.j2'
+        dest: '/etc/motd'
+        owner: 'root'
+        group: 'root'
+        mode: '0744'
+
+    - name: Insert line into /root/.bash_logout
+      lineinfile:
+        dest: /root/.bash_logout
+        line: cat logout.txt
+        state: present
+
+    - name: Configure logout text
+      template:
+        src: 'logout.j2'
+        dest: '/root/logout.txt'
+        owner: 'root'
+        group: 'root'
+        mode: '0744'
+
+    - name: Install VIM
+      package:
+        name: vim
+        state: latest
+
+    - name: Create phpfpm user
+      user:
+        name: phpfpm
+        system: yes
 
   roles:
     - ansible-role-repo-epel
@@ -13,30 +53,39 @@
     - ansible-role-php
     - ansible-role-mysql
 
-  tasks: 
-    - name: Pass PHP to php-fpm
-      blockinfile:
-        dest: /etc/nginx/conf.d/default.conf
-        insertbefore: "}"
-        block: |
-          location ~ \.php$ {
-          root           /usr/share/nginx/html;
-          try_files $uri =404;
-          fastcgi_pass   127.0.0.1:9000;
-          fastcgi_index  index.php;
-          fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
-          include        fastcgi_params;
-          }
+  tasks:
 
-    - name: Install VIM
-      package:
-        name: vim
-        state: latest
+    - name: Create /var/www/example.com
+      file:
+        state: directory
+        path: /var/www/example.com
+        owner: nginx
+        mode: 755
+ 
+#    - name: Pass PHP to php-fpm
+#      blockinfile:
+#        dest: /etc/nginx/conf.d/default.conf
+#        insertbefore: "}"
+#        block: |
+#          location ~ \.php$ {
+#          root           /usr/share/nginx/html;
+#          try_files $uri =404;
+#          fastcgi_pass   127.0.0.1:9000;
+#          fastcgi_index  index.php;
+#          fastcgi_param  SCRIPT_FILENAME  $document_root$fastcgi_script_name;
+#          include        fastcgi_params;
+#          }
 
-    - name: Allow Nginx in firewalld
+    - name: Allow Port 80 in Firewalld
       firewalld:
         immediate: yes
         service: http
         permanent: true
         state: enabled
 
+    - name: Allow Port 443 in Firewalld
+      firewalld:
+        immediate: yes
+        service: https
+        permanent: true
+        state: enabled

@@ -15,7 +15,7 @@ __php_packages:
   - php-pecl-apcu
   - php-xml
   - php-xmlrpc
-__php_webserver_daemon: "nginx"
+__php_webserver_daemon: "httpd"
 
 __php_conf_paths:
   - /etc
@@ -29,5 +29,5 @@ __php_fpm_daemon: php-fpm
 __php_fpm_conf_path: "/etc/fpm"
 __php_fpm_pool_conf_path: "/etc/php-fpm.d/www.conf"
 
-__php_fpm_pool_user: nginx
-__php_fpm_pool_group: nginx
+__php_fpm_pool_user: apache
+__php_fpm_pool_group: apache
