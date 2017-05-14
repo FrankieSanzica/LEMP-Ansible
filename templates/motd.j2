@@ -1,8 +1,13 @@
+
 #############################################################################
-    Welcome to {{ansible_nodename}} ({{ansible_default_ipv4.address}})
-    {{ansible_distribution}} {{ansible_distribution_release}} {{ansible_distribution_version}} on {{ansible_product_name}}
-    Stats: {{(ansible_memtotal_mb /1024)|round()}} GiB, {{ansible_processor_count}} {{ansible_architecture}} processor(s)
-    This host is {{ ansible_managed }}.
+
+    HOST: {{ansible_nodename}} 
+    IP: ({{ansible_default_ipv4.address}})
+    OS: {{ansible_distribution}} {{ansible_distribution_release}} {{ansible_distribution_version}} on {{ansible_product_name}}
+    CPU: {{ansible_processor_count}} {{ansible_architecture}} processor(s) 
+    MEM: {{(ansible_memtotal_mb /1024)|round()}} GB
+    {{ ansible_managed }}
+
 #############################################################################
 
                                 .=MMMMMMMM, . .
@@ -49,4 +54,5 @@
                                             ..MM$$ZZZZZM?MM.
                                               MMM77$$$MMMM
                                                 MMMMMMM.
+
 ~
