@@ -2,7 +2,8 @@
 # vHosts Variables
 vhosts:
   name: vhost1
-  site: example.com
+  site: frankiesanzica.com
+  git: https://github.com/FrankieSanzica/FrankieSanzica.com.git
 
 # Nginx
 nginx_remove_default_vhost: true
@@ -16,10 +17,12 @@ php_webserver_daemon: "nginx"
 php_enable_php_fpm: true
 
 # PHP-FPM
+php_fpm_listen: "/var/run/php-fpm/www.sock"
 php_fpm_pool_user: "phpfpm"
 php_fpm_pool_group: "nginx"
 php_fpm_listen_owner: "phpfpm"
 php_fpm_listen_group: "nginx"
+php_fpm_pool_conf_path: "/var/run/php-fpm/php-fpm.d/www.conf" 
 
 # MySQL
 mysql_root_password: "root"

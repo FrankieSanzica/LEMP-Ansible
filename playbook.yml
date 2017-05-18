@@ -1,4 +1,3 @@
----
 - hosts: all
   gather_facts: yes
   become: true
@@ -36,10 +35,13 @@
         group: 'root'
         mode: '0744'
 
-    - name: Install VIM
+    - name: Install VIM & Git
       package:
-        name: vim
+        name: "{{ item }}"
         state: latest
+      with_items:
+        - vim
+        - git
 
     - name: Create phpfpm user
       user:
@@ -48,13 +50,14 @@
         system: yes
 
   roles:
+
     - ansible-role-repo-epel
     - ansible-role-repo-remi
     - ansible-role-nginx
     - ansible-role-php
     - ansible-role-mysql
 
-  tasks:
+  post_tasks:
 
     - name: Create /var/www/{{ item.site }}/public directory
       file: path=/var/www/{{ item.site }}/public state=directory group=nginx mode=755
@@ -76,3 +79,17 @@
         - http
         - https
 
+    - name: Correct PHP-FPM socket permissions
+      file: 
+        path: /var/run/php-fpm/www.sock
+        owner: 'phpfpm'
+        group: 'nginx'
+
+#    - name: Clone Git repo
+#     git: 
+#        clone: yes
+#        dest: /var/www/{{  item.site }}
+#        repo: "{{ item.git }}"
+#        force: yes
+#     with_items:
+#        - "{{ vhosts }}"
