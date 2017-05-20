@@ -21,7 +21,7 @@
         group: 'root'
         mode: '0744'
 
-    - name: Insert line into /root/.bash_logout
+    - name: Insert include into /root/.bash_logout
       lineinfile:
         dest: /root/.bash_logout
         line: cat logout.txt
@@ -43,11 +43,13 @@
         - vim
         - git
 
-    - name: Create phpfpm user
+    - name: Create FPM user(s)
       user:
-        name: phpfpm
+        name: "{{ item.fpm }}"
         state: present
         system: yes
+      with_items: 
+        - "{{ vhosts }}"    
 
   roles:
 
@@ -59,16 +61,21 @@
 
   post_tasks:
 
-    - name: Create /var/www/{{ item.site }}/public directory
-      file: path=/var/www/{{ item.site }}/public state=directory group=nginx mode=755
+    - name: Create /var/www/{{ item.site }} directory
+      file: path=/var/www/{{ item.site }} state=directory group=nginx mode=755
       with_items:
-        - "{{ vhosts }}"                        
-    
+        - "{{ vhosts }}"
+ 
     - name: Create vhost file from template
       template: src=templates/vhost.j2 dest=/etc/nginx/conf.d/{{ item.site }}.conf
       with_items:
         - "{{ vhosts }}"
- 
+
+    - name: Create pool file from template
+      template: src=templates/pool.j2 dest=/etc/php-fpm.d/{{ item.site }}.conf
+      with_items:
+        - "{{ vhosts }}"
+
     - name: Allow Ports 80 & 443 in Firewalld
       firewalld:
         immediate: yes
@@ -79,17 +86,38 @@
         - http
         - https
 
-    - name: Correct PHP-FPM socket permissions
-      file: 
-        path: /var/run/php-fpm/www.sock
-        owner: 'phpfpm'
-        group: 'nginx'
+    - name: Remove /etc/php-fpm.d/www.conf
+      file:
+        name: /etc/php-fpm.d/www.conf
+        state: absent
 
-#    - name: Clone Git repo
-#     git: 
-#        clone: yes
-#        dest: /var/www/{{  item.site }}
-#        repo: "{{ item.git }}"
-#        force: yes
-#     with_items:
-#        - "{{ vhosts }}"
+    - name: Correct /var/www/ Permissions
+      file:
+        name: /var/www
+        group: nginx
+        mode: 1517
+
+    - name: Correct Socket Ownership
+      file:
+        name: /var/run/php-fpm/
+        group: nginx
+        mode: 1517
+
+    - name: Start PHP-FPM
+      service: 
+        name: php-fpm
+        state: restarted
+
+    - name: Clone Git repo
+      git: 
+        clone: yes
+        dest: /var/www/{{  item.site }}
+        repo: "{{ item.git }}"
+        force: yes
+      with_items:
+        - "{{ vhosts }}
+
+    - name: Restart Nginx
+      service: 
+        name: nginx
+        state: restarted"
