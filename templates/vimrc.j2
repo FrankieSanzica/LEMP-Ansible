@@ -1,0 +1,43 @@
+" {{ ansible_managed }}
+
+" ======= Colorization =======
+" the desert colorscheme seems to be a good balance for mac users and people
+" still using putty.
+colorscheme desert
+" Syntax highlighting: deal with it (⌐■_■)
+syntax enable
+" Make sure pasting doesn't autoindent
+set paste
+" Wrap the line
+set wrap
+
+
+" ======= Indentation =======
+" While 8 spaces are the past and 2 spaces are the future, 4 is the present.
+set ts=4
+set softtabstop=4
+set expandtab
+
+
+" ======= File Configs =======
+" python, ruby and yaml all use 2 space soft tabs.
+autocmd BufRead *.py set ts=2 softtabstop=2
+autocmd BufRead *.rb set ts=2 softtabstop=2
+autocmd BufRead *.yml set ts=2 softtabstop=2
+autocmd BufRead *.yaml set ts=2 softtabstop=2
+
+
+" ======= UI =======
+" enables autocomplete for filenames in command mode, e.g. :e ~/vim<tab>
+set wildmenu
+" enable incremental highlighting searches
+set incsearch
+set hlsearch
+
+
+" If for some bizarre reason you need specific configurations for a host,
+" ansible will place them under here.
+" ==================
+{% for item in vim_config %}
+{{ item }}
+{% endfor %}

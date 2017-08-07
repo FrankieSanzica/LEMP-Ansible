@@ -1,7 +1,4 @@
 server {
-    listen 80 default_server;
-    listen [::]:80 default_server ipv6only=on;
-
     root /var/www/{{  item.site  }};
     index index.php index.html index.htm;
 
@@ -10,14 +7,13 @@ server {
     error_log /var/log/nginx/{{ item.site }}.error.log;
     access_log /var/log/nginx/{{ item.site }}.access.log;
 
-    gzip on;
-    
     location / {
         try_files $uri $uri/ =404;
     }
 
     error_page 404 /404.html;
     error_page 500 502 503 504 /50x.html;
+    
     location = /50x.html {
         root /var/www/{{  item.site  }};
     }

@@ -43,11 +43,46 @@
         - vim
         - git
 
+    - name: Set global default editor to vim | Rhel
+      lineinfile:
+        dest: '/etc/profile.d/vim.sh'
+        regexp: '{{ item.regexp }}'
+        line: '{{ item.line }}'
+        insertafter: EOF
+      with_items:
+        - { regexp: '^export VISUAL="vim"', line: 'export VISUAL="vim"' }
+        - { regexp: '^export EDITOR="vim"', line: 'export EDITOR="vim"' }
+
+    - name: Adding source vimrc.local include
+      lineinfile:
+        state: present
+        dest: '/etc/vimrc'
+        insertafter: EOF
+        line: 'source /etc/vimrc.local'
+
+    - name: Configure vim global options
+      template:
+        src: 'vimrc.j2'
+        dest: '/etc/vimrc.local'
+        owner: 'root'
+        group: 'root'
+        mode: '0744'
+
+    - name: Add colorprompt script
+      template:
+        src: 'colorprompt.j2'
+        dest: '/etc/profile.d/colorprompt.sh'
+        owner: 'root'
+        group: 'root'
+        mode: '0755'
+      tags: ["colorprompt"]
+
     - name: Create FPM user(s)
       user:
         name: "{{ item.fpm }}"
         state: present
         system: yes
+        createhome: no
       with_items: 
         - "{{ vhosts }}"    
 
@@ -91,33 +126,12 @@
         name: /etc/php-fpm.d/www.conf
         state: absent
 
-    - name: Correct /var/www/ Permissions
-      file:
-        name: /var/www
-        group: nginx
-        mode: 1517
-
-    - name: Correct Socket Ownership
-      file:
-        name: /var/run/php-fpm/
-        group: nginx
-        mode: 1517
-
-    - name: Start PHP-FPM
+    - name: Restart PHP-FPM
       service: 
         name: php-fpm
         state: restarted
 
-    - name: Clone Git repo
-      git: 
-        clone: yes
-        dest: /var/www/{{  item.site }}
-        repo: "{{ item.git }}"
-        force: yes
-      with_items:
-        - "{{ vhosts }}
-
     - name: Restart Nginx
       service: 
         name: nginx
-        state: restarted"
+        state: restarted

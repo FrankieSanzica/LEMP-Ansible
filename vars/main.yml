@@ -1,9 +1,10 @@
 ---
 # vHosts Variables
 vhosts:
-  site: frankiesanzica.com
-  fpm: frankie-fpm
-  git: https://github.com/FrankieSanzica/FrankieSanzica.com.git
+  - site: frankiesanzica.com
+    fpm: frankie-fpm
+
+vim_config: []
 
 # Nginx
 nginx_remove_default_vhost: true
@@ -15,6 +16,10 @@ php_date_timezone: "America/Detroit"
 php_enable_webserver: true
 php_webserver_daemon: "nginx"
 php_enable_php_fpm: true
+
+php_packages:
+  - php70-php
+  - php70-php-cli
 
 # MySQL
 mysql_root_password: "root"
